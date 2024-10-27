@@ -1,0 +1,102 @@
+---
+title: "Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    source: embed
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(dplyr)
+library(forcats)
+library(plotly)
+library(p8105.datasets)
+library(rnoaa)
+```
+
+```{r data}
+stations = ghcnd_stations()
+
+nystationids =  stations |> 
+  filter(state == "NY") |>  
+  distinct(id)
+
+nydat = meteo_pull_monitors(nystationids$id[1:5],
+                             date_min = "1993-01-01", 
+                             date_max = "2023-12-31", 
+                             var = c("PRCP", "SNOW", "SNWD", "TMAX", "TMIN"))
+
+nydat = nydat |>
+  mutate (
+    prcp = ifelse(!is.na(prcp), as.numeric(prcp)/10, NA),
+    )
+```
+
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r scatter}
+nydat |>
+  mutate(text_label = str_c("<br>Snow Depth: ", snwd, " mm"),
+         custom_hover = str_c("<br>Precipitation: ", prcp, " mm"),
+         combined_text = str_c(text_label, custom_hover)
+         ) |>
+  plot_ly(
+    x = ~ date, y = ~ snwd, type = "scatter", mode = "markers",
+    color = ~id, text = ~combined_text, hoverinfo = "x+text", alpha = 0.8) |> 
+  layout(
+    title = "Snow Depth (mm) across 20 Years",
+    xaxis = list(title = "Date"),
+    yaxis = list(title = "Snow Depth (mm)")
+  )
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r boxplot}
+nydat |>
+  separate (date, into=c("year", "month", "date", sep = "-")) |> 
+  mutate(
+    text_label = str_c("\nStation Name: ", id, " "),  
+    custom_hover = str_c("<br>Precipitation: ", prcp, "mm"),
+    combined_text = str_c(text_label, custom_hover)) |>
+  plot_ly(
+    x = ~ year, y = ~ prcp, type = "box",
+    color = ~id, alpha = 0.8, 
+    text = ~combined_text, hoverinfo = "text") |> 
+  layout(
+    title = "Precipitation (mm) across 20 Years",
+    xaxis = list(title = "Year"),
+    yaxis = list(title = "Precipitation (mm)")
+  )
+```
+
+### Chart C
+
+```{r barplot}
+nydat |>
+  separate(date, into = c("year", "month", "day"), sep = "-") |>
+  mutate(year = as.numeric(year)) |>
+  filter(snow > 0) |>
+  group_by(id,year) |>
+  summarise(days_with_snow = n()) |>
+  ungroup() |>
+  mutate(id = fct_reorder(id, days_with_snow)) |> 
+  mutate(custom_hover = str_c(year, ", ", days_with_snow, " days")) |>  
+  plot_ly(x = ~year, y = ~days_with_snow, color = ~id,
+          type = "bar", colors= "viridis", 
+          text = ~custom_hover, hoverinfo = "text") |>
+  layout(
+    title = "Days with Snowfall per Year",
+    xaxis = list(title = "Year"),
+    yaxis = list(title = "Number of Days with Snowfall")
+  )
+```
