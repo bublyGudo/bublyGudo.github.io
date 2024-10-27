@@ -1,0 +1,30 @@
+---
+title: "Fang Wang (fw2394) – Public Health Data Science Student at Columbia University"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+![](images/CV_photo.jpeg)
+
+
+# Education & Training
+
+
+*• Senior Technician, Columbia University, April 2022-Present.*
+
+*• Lab technician, Shanghai Institute for Biological Sciences of Chinese Academy of Science, China, August 2013- September 2018.*
+
+*• Research Assistant, Shanghai University, China, September 2010-July 2013.*
+
+
+
+# Overview
+
+
+Fang is currently working at Columbia University while pursuing a half-time degree in Public Health Data Science. Passionate about data-driven solutions for public health, Fang balances their academic and professional life with hobbies like reading, cooking, and traveling, which offer a refreshing perspective and inspire creativity in their work.
+
+
+
+
